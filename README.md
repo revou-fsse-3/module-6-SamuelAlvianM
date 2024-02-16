@@ -9,7 +9,7 @@
 > FLASK_DEBUG=True <br>
 > FLASK_ENV=development
 
-<h2 align="center"> comment to run the app </h2>
+<h2 align="center"> command to run the app </h2>
 
 1. Install Environment - `poetry install`
 2. set up the environment `poetry shell`
