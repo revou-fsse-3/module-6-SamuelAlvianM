@@ -1,4 +1,6 @@
 from flask import Blueprint, request
+from pydantic import ValidationError
+from app.controller.animaldata.Schema.create_animal_req import Create_animal_request
 from ...utils.database import db
 from app.models.animal import Animal
 from app.utils.api_response import api_response
@@ -49,7 +51,7 @@ def search_animal():
         animals = animal_service.search_animal(request_data["name"])
         return api_response(
             status_code=200,
-            message="",
+            message="ini yang kamu cari?",
             data=animals
         )
     except Exception as e:
@@ -61,18 +63,29 @@ def create_animal():
 
     try:
         data = request.json
-        print(data)
-        animal = Animal()
-        animal.name = data['name']
-        animal.age = data['age']
-        animal.species = data['species']        
-        animal.gender = data['gender']
-        animal.habitat = data['habitat']        
-        db.session.add(animal)
-        db.session.commit()
-        return 'berhasil ditambahkan', 200
+        update_animal_request = Create_animal_request(**data)
+
+        animal_service = Animal_service()
+
+        animals = animal_service.create_animal(update_animal_request)
+
+        return api_response(
+            status_code=201,
+            message="berhasil ditambahkan",
+            data= animals
+        )
+    except ValidationError as e:
+        return api_response(
+            status_code=400,
+            message=e.errors(),
+            data={}
+        )
     except Exception as e:
-        return e, 200
+        return api_response(
+            status_code=500,
+            message=str(e),
+            data={}
+        )
     
 @animal_blueprint.route('/<int:animal_id>', methods=["PUT"])
 def update_animal(animal_id):
@@ -100,17 +113,21 @@ def delete_animal(animal_id):
         animal_service = Animal_service()
         is_deleted = animal_service.delete_animal(animal_id)
         
-        if is_deleted:
-            return api_response(
-                status_code=200,
-                message="Data berhasil dihapus",
-                data=None
-            )
-        else:
+        if is_deleted == "Data tidak ditemukan":
             return api_response(
                 status_code=404,
-                message="Data tidak ditemukan",
-                data=None
+                message=is_deleted,
+                data="none"
+            )
+        
+        return api_response(
+                status_code=200,
+                message="Data Berhasil dihapus",
+                data=is_deleted
             )
     except Exception as e:
-        return str(e), 500
+        return api_response(
+            status_code=500,
+            message = str(e),
+            data={}
+        )
