@@ -1,4 +1,4 @@
-from flask import Flask, Response
+
 from app.controller.animaldata.Schema.create_animal_req import Create_animal_request
 from app.models.animal import Animal
 from app.services.animal_services import Animal_service

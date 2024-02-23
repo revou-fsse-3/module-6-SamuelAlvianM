@@ -17,6 +17,11 @@ class Employee_repo():
         db.session.commit()
         return employee_obj
     
+    def create_Employee(self, employee):
+        db.session.add(employee)
+        db.session.commit()
+        return employee
+    
 
     def search_Employee(self, name):
         employees = Employee.query.filter(Employee.name.like(f"%{name}%")).all()
@@ -24,8 +29,7 @@ class Employee_repo():
     
     def delete_Employee(self, id):
         employee_obj = Employee.query.get(id)
-        if employee_obj:
-            db.session.delete(employee_obj)
-            db.session.commit()
-            return True
-        return False
+
+        db.session.delete(employee_obj)
+        db.session.commit()
+        return employee_obj

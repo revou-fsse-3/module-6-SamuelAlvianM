@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request
+from pydantic import ValidationError
+from app.controller.employeedata.Schema.create_employee_req import Create_employee_request
 from ...utils.database import db
 from app.models.Employee import Employee
 from app.utils.api_response import api_response
@@ -60,18 +62,29 @@ def create_Employee():
 
     try:
         data = request.json
+        update_employee_request = Create_employee_request(**data)
 
-        employee = Employee()
-        employee.name = data['name']
-        employee.age = data['age']
-        employee.phone = data['phone']
-        employee.gender = data['gender']        
-        employee.division = data['division']        
-        db.session.add(employee)
-        db.session.commit()
-        return 'berhasil ditambahkan', 200
+        employee_service = Employee_service()
+
+        employees = employee_service.create_employee(update_employee_request)
+
+        return api_response(
+            status_code=201,
+            message="berhasil ditambahkan",
+            data= employees
+        )
+    except ValidationError as e:
+        return api_response(
+            status_code=400,
+            message=e.errors(),
+            data={}
+        )
     except Exception as e:
-        return e, 200
+        return api_response(
+            status_code=500,
+            message=str(e),
+            data={}
+        )
     
 @employee_blueprint.route('/<int:employee_id>', methods=["PUT"])
 def update_Employee(employee_id):
@@ -99,17 +112,21 @@ def delete_Employee(employee_id):
         employee_service = Employee_service()
         is_deleted = employee_service.delete_Employee(employee_id)
         
-        if is_deleted:
-            return api_response(
-                status_code=200,
-                message="Data berhasil dihapus",
-                data=None
-            )
-        else:
+        if is_deleted == "Data tidak ditemukan":
             return api_response(
                 status_code=404,
-                message="Data tidak ditemukan",
-                data=None
+                message=is_deleted,
+                data="none"
+            )
+        
+        return api_response(
+                status_code=200,
+                message="Data Berhasil dihapus",
+                data=is_deleted
             )
     except Exception as e:
-        return str(e), 500
+        return api_response(
+            status_code=500,
+            message = str(e),
+            data={}
+        )
