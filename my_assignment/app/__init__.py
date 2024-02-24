@@ -2,6 +2,7 @@ from flask import Flask
 from app.controller.employeedata import employee_route
 from app.controller.animaldata import animal_route
 from app.controller.feedingdata import feeding_route
+from app.controller.reportdata import report_route
 import os
 from app.utils.database import db
 
@@ -23,4 +24,4 @@ with app.app_context():
 app.register_blueprint(animal_route.animal_blueprint, url_prefix="/v1/animals")
 app.register_blueprint(employee_route.employee_blueprint, url_prefix="/v1/employee")
 app.register_blueprint(feeding_route.feeding_blueprint, url_prefix="/v1/animals/feeding-time")
-
+app.register_blueprint(report_route.report_blueprint, url_prefix="/v1/reports")
